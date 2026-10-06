@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>نظام إدارة كنتين المدرسة</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial;background:#f5f7fb;color:#172033}
+header{background:linear-gradient(135deg,#172554,#2563eb);color:white;padding:22px 18px;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:22px}header small{opacity:.8}
+nav{display:flex;gap:8px;overflow:auto;padding:10px;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:83px;z-index:4}
+nav button{border:0;background:#eef2ff;padding:10px 14px;border-radius:12px;white-space:nowrap;cursor:pointer}
+nav button.active{background:#2563eb;color:#fff}
+main{max-width:1200px;margin:auto;padding:18px}.page{display:none}.page.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:18px;box-shadow:0 6px 24px #1720330b;margin-bottom:14px}
+.kpi b{font-size:27px;display:block;margin-top:8px}.muted{color:#64748b}.btn{border:0;background:#2563eb;color:#fff;padding:10px 14px;border-radius:11px;cursor:pointer}.btn.secondary{background:#eef2ff;color:#1e3a8a}.btn.danger{background:#dc2626}
+input,select{padding:10px;border:1px solid #cbd5e1;border-radius:10px;width:100%;background:white}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end}
+table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:right}th{background:#f8fafc}
+.notice{padding:12px;border-radius:12px;background:#eff6ff;color:#1e40af;margin-bottom:12px}.warn{background:#fff7ed;color:#9a3412}.ok{background:#ecfdf5;color:#047857}
+@media(max-width:600px){main{padding:10px}.card{padding:14px}header{padding:16px}nav{top:72px}.grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header><h1>🏪 نظام إدارة كنتين المدرسة</h1><small>نسخة تجريبية تعمل مباشرة من المتصفح — البيانات محفوظة على هذا الجهاز</small></header>
+<nav id="nav">
+<button data-page="home" class="active">الرئيسية</button><button data-page="products">المنتجات</button>
+<button data-page="stock">المخزون</button><button data-page="sales">المبيعات</button>
+<button data-page="daily">اليومي</button><button data-page="stocktake">الجرد</button>
+<button data-page="reports">التقارير</button><button data-page="backup">النسخ</button>
+</nav>
+<main>
+<section id="home" class="page active">
+<div class="grid">
+<div class="card kpi"><span class="muted">إيراد اليوم</span><b id="kRevenue">0 ج.م</b></div>
+<div class="card kpi"><span class="muted">عدد المنتجات</span><b id="kProducts">0</b></div>
+<div class="card kpi"><span class="muted">أصناف منخفضة</span><b id="kLow">0</b></div>
+<div class="card kpi"><span class="muted">فرق النقدية</span><b id="kDiff">0 ج.م</b></div>
+</div>
+<div class="card"><h2>اختبار سريع</h2><p class="muted">هذه نسخة GitHub Pages تجريبية. جرّب إضافة أصناف، إدخال مخزون، تسجيل مبيعات، جرد وتقارير. البيانات تُحفظ في المتصفح.</p><div id="homeNotice" class="notice ok">النظام جاهز للتجربة.</div></div>
+</section>
+
+<section id="products" class="page">
+<div class="card"><h2>المنتجات</h2><div class="form">
+<label>اسم المنتج<input id="pName"></label><label>SKU<input id="pSku"></label>
+<label>الوحدة<select id="pUnit"><option>قطعة</option><option>كوب</option><option>كيلو</option><option>جرام</option></select></label>
+<label>سعر البيع<input id="pPrice" type="number" step=".01"></label>
+<label>حد التنبيه<input id="pMin" type="number" step=".01" value="5"></label>
+<button class="btn" onclick="addProduct()">إضافة منتج</button></div></div>
+<div class="card" id="productTable"></div>
+</section>
+
+<section id="stock" class="page">
+<div class="card"><h2>إدخال مخزون</h2><div class="form">
+<label>المنتج<select id="sProduct"></select></label><label>الكمية<input id="sQty" type="number" step=".01"></label>
+<label>تكلفة الوحدة<input id="sCost" type="number" step=".01"></label><label>تاريخ الدخول<input id="sDate" type="date"></label>
+<label>الصلاحية<input id="sExp" type="date"></label><button class="btn" onclick="receiveStock()">إضافة للمخزون</button></div></div>
+<div class="card" id="stockTable"></div>
+</section>
+
+<section id="sales" class="page">
+<div class="card"><h2>تسجيل مبيعات الفترة</h2><div class="form">
+<label>الفترة<select id="saleShift"><option>صباحية</option><option>مسائية</option></select></label>
+<label>المنتج<select id="saleProduct"></select></label><label>الكمية<input id="saleQty" type="number" step=".01"></label>
+<button class="btn" onclick="addSale()">تسجيل البيع</button></div></div>
+<div class="card" id="salesTable"></div>
+</section>
+
+<section id="daily" class="page">
+<div class="card"><h2>المنتجات اليومية</h2><div class="form">
+<label>البيان<input id="dName" placeholder="فول / جبنة / كبدة / سكر..."></label>
+<label>الكمية<input id="dQty" type="number" step=".01"></label><label>الإجمالي<input id="dTotal" type="number" step=".01"></label>
+<button class="btn" onclick="addDaily()">إضافة</button></div></div><div class="card" id="dailyTable"></div>
+<div class="card"><h2>إغلاق اليوم</h2><div class="form"><label>النقد المسلم<input id="cashActual" type="number" step=".01"></label><button class="btn" onclick="closeDay()">حساب وإغلاق</button></div><div id="closeResult"></div></div>
+</section>
+
+<section id="stocktake" class="page">
+<div class="card"><h2>الجرد</h2><p class="muted">سجّل الكمية الفعلية ثم احسب الفروق.</p><div id="stocktakeTable"></div><button class="btn" onclick="saveStocktake()">حفظ الجرد</button></div>
+</section>
+
+<section id="reports" class="page">
+<div class="card"><h2>التقارير</h2><div class="form"><label>من<input id="rFrom" type="date"></label><label>إلى<input id="rTo" type="date"></label><button class="btn" onclick="renderReports()">عرض</button><button class="btn secondary" onclick="window.print()">طباعة</button></div></div>
+<div class="card" id="reportsResult"></div>
+</section>
+
+<section id="backup" class="page">
+<div class="card"><h2>النسخ الاحتياطي</h2><div class="notice">في هذه النسخة التجريبية يتم حفظ نسخة JSON داخل المتصفح ويمكن تنزيلها. نسخة السيرفر النهائية تستخدم SQLite ونسخًا تلقائية.</div>
+<button class="btn" onclick="downloadBackup()">تنزيل نسخة</button><label style="display:inline-block;margin:10px"><input type="file" id="restoreFile" accept=".json" onchange="restoreBackup(event)"></label>
+<div id="backupInfo" class="muted"></div></div>
+</section>
+</main>
+<script>
+const KEY="canteen_demo_v1";
+let db=JSON.parse(localStorage.getItem(KEY)||'{"products":[],"stock":[],"sales":[],"daily":[],"stocktakes":[],"closures":[]}');
+const today=()=>new Date().toISOString().slice(0,10);
+for(const id of ["sDate","rFrom","rTo"]) if(document.getElementById(id)) document.getElementById(id).value=today();
+function save(){localStorage.setItem(KEY,JSON.stringify(db));renderAll()}
+function money(n){return Number(n||0).toLocaleString("ar-EG",{minimumFractionDigits:2})+" ج.م"}
+function product(id){return db.products.find(x=>x.id==id)}
+function stockQty(id){return db.stock.filter(x=>x.productId==id).reduce((a,x)=>a+Number(x.qty),0)-db.sales.filter(x=>x.productId==id).reduce((a,x)=>a+Number(x.qty),0)}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.querySelector("#"+b.dataset.page).classList.add("active");document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderAll()});
+function addProduct(){let name=pName.value.trim();if(!name)return alert("اكتب اسم المنتج");db.products.push({id:Date.now(),name,sku:pSku.value.trim(),unit:pUnit.value,price:+pPrice.value||0,min:+pMin.value||0});save();pName.value=pSku.value=pPrice.value=""}
+function addStock(id,qty,cost,date,exp){db.stock.push({id:Date.now(),productId:+id,qty:+qty,cost:+cost||0,date,exp});save()}
+function receiveStock(){if(!sProduct.value||!sQty.value)return alert("اختر المنتج والكمية");addStock(sProduct.value,sQty.value,sCost.value,sDate.value,sExp.value)}
+function addSale(){let p=product(saleProduct.value),q=+saleQty.value;if(!p||q<=0)return alert("بيانات البيع غير صحيحة");if(stockQty(p.id)<q)return alert("الكمية المتاحة في المخزون غير كافية");db.sales.push({id:Date.now(),date:today(),shift:saleShift.value,productId:p.id,qty:q,price:p.price,total:q*p.price});save();saleQty.value=""}
+function addDaily(){let name=dName.value.trim(),q=+dQty.value,total=+dTotal.value;if(!name||q<=0||total<0)return alert("أدخل البيانات بشكل صحيح");db.daily.push({id:Date.now(),date:today(),name,qty:q,total});save();dName.value=dQty.value=dTotal.value=""}
+function closeDay(){let rev=db.sales.filter(x=>x.date===today()).reduce((a,x)=>a+x.total,0)+db.daily.filter(x=>x.date===today()).reduce((a,x)=>a+x.total,0);let actual=+cashActual.value||0;let diff=actual-rev;db.closures.push({date:today(),expected:rev,actual,diff});save();closeResult.innerHTML='<div class="notice '+(diff===0?"ok":"warn")+'">المتوقع: '+money(rev)+' — المسلم: '+money(actual)+' — الفرق: '+money(diff)+'</div>'}
+function saveStocktake(){let lines=[...document.querySelectorAll("[data-st]")].map(i=>{let p=product(i.dataset.st),book=stockQty(p.id),actual=+i.value||0;return {productId:p.id,date:today(),book,actual,diff:actual-book}});db.stocktakes.push({id:Date.now(),date:today(),lines});save();alert("تم حفظ الجرد")}
+function opts(){return db.products.map(p=>`<option value="${p.id}">${p.name} — ${p.price} ج.م</option>`).join("")}
+function renderAll(){kProducts.textContent=db.products.length;kRevenue.textContent=money(db.sales.filter(x=>x.date===today()).reduce((a,x)=>a+x.total,0)+db.daily.filter(x=>x.date===today()).reduce((a,x)=>a+x.total,0));kLow.textContent=db.products.filter(p=>stockQty(p.id)<=p.min).length;let c=db.closures.filter(x=>x.date===today()).at(-1);kDiff.textContent=money(c?.diff||0);
+sProduct.innerHTML=saleProduct.innerHTML=opts();
+productTable.innerHTML=table(["المنتج","الوحدة","السعر","الرصيد","الحد"],db.products.map(p=>[p.name,p.unit,money(p.price),stockQty(p.id),p.min]));
+stockTable.innerHTML=table(["المنتج","الكمية","التكلفة","الدخول","الصلاحية"],db.stock.map(x=>[product(x.productId)?.name||"",x.qty,money(x.cost),x.date,x.exp||"—"]));
+salesTable.innerHTML=table(["التاريخ","الفترة","المنتج","الكمية","السعر","الإجمالي"],db.sales.slice().reverse().map(x=>[x.date,x.shift,product(x.productId)?.name||"",x.qty,money(x.price),money(x.total)]));
+dailyTable.innerHTML=table(["التاريخ","البيان","الكمية","الإجمالي"],db.daily.slice().reverse().map(x=>[x.date,x.name,x.qty,money(x.total)]));
+stocktakeTable.innerHTML=table(["المنتج","الرصيد الدفتري","الفعلي","الفرق"],db.products.map(p=>[p.name,stockQty(p.id),`<input data-st="${p.id}" type="number" step=".01" value="${stockQty(p.id)}">`,"يُحسب عند الحفظ"]));
+}
+function table(h,r){return '<table><tr>'+h.map(x=>'<th>'+x+'</th>').join("")+'</tr>'+r.map(a=>'<tr>'+a.map(x=>'<td>'+x+'</td>').join("")+'</tr>').join("")+'</table>'}
+function renderReports(){let from=rFrom.value,to=rTo.value||from,s=db.sales.filter(x=>x.date>=from&&x.date<=to),d=db.daily.filter(x=>x.date>=from&&x.date<=to),rev=s.reduce((a,x)=>a+x.total,0)+d.reduce((a,x)=>a+x.total,0);reportsResult.innerHTML='<h2>تقرير من '+from+' إلى '+to+'</h2>'+table(["البند","القيمة"],[["مبيعات المنتجات",money(s.reduce((a,x)=>a+x.total,0))],["المنتجات اليومية",money(d.reduce((a,x)=>a+x.total,0))],["الإجمالي",money(rev)],["عدد عمليات البيع",s.length]])}
+function downloadBackup(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="canteen-demo-backup-"+today()+".json";a.click();URL.revokeObjectURL(a.href)}
+function restoreBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();alert("تمت استعادة النسخة التجريبية")}catch{alert("ملف النسخة غير صالح")}};r.readAsText(f)}
+renderAll();
+</script>
+</body></html>
